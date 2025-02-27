@@ -5,7 +5,7 @@ const Header = () => {
     <div className="flex justify-between items-center">
       <div>
         <h1 className="font-bold text-lg md:text-xl">
-          Sultan Temuruly's website
+          Sultan Temuruly&apos;s website
         </h1>
       </div>
       <div>

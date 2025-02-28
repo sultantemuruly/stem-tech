@@ -1,14 +1,26 @@
 import About from "@/components/About";
 import { fetchPages } from "@/lib/notion";
+import Link from "next/link";
 
 export default async function Home() {
-  const post = await fetchPages();
+  const posts = await fetchPages();
 
   return (
     <div>
       <About />
       <div className="text-md">
         <div className="font-medium">Blogs</div>
+        {posts.results.map((post: any) => {
+          return (
+            <article key={post.id}>
+              <Link
+                href={`/blog/${post.properties.slug.rich_text[0].plain_text}`}
+              >
+                {post.properties.Title.title[0].plain_text}
+              </Link>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

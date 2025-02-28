@@ -11,7 +11,6 @@ export default async function Home() {
       <div className="text-md">
         <div className="font-medium">Blogs</div>
         {posts.results.map((post: any) => {
-          console.log(post.properties);
           return (
             <article key={post.id} className="flex justify-between">
               <Link

@@ -1,11 +1,15 @@
 import About from "@/components/About";
+import { fetchPages } from "@/lib/notion";
 
-export default function Home() {
+export default async function Home() {
+  const post = await fetchPages();
+
   return (
     <div>
       <About />
-      <div>{process.env.NOTION_DATABASE_ID!}</div>
-      <div>{process.env.NOTION_TOKEN!}</div>
+      <div className="text-md">
+        <div className="font-medium">Blogs</div>
+      </div>
     </div>
   );
 }

@@ -15,7 +15,7 @@ export const fetchPages = React.cache(() => {
     database_id: process.env.NOTION_DATABASE_ID!,
     filter: {
       property: "Status",
-      select: {
+      status: {
         equals: "Done",
       },
     },

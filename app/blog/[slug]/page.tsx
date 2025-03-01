@@ -13,7 +13,11 @@ hljs.registerLanguage("plaintext", () => ({
 // Also register it as 'plain text'
 hljs.registerAliases("plain text", { languageName: "plaintext" });
 
-export default async function Page({ params }: { params: { slug: string } }) {
+interface PageProps {
+  params: { slug: string };
+}
+
+export default async function Page({ params }: PageProps) {
   const post = await fetchBySlug(params.slug);
   if (!post) return <div>404 page not found</div>;
 

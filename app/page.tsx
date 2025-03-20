@@ -2,9 +2,11 @@ import About from "@/components/About";
 import { fetchPages } from "@/lib/notion";
 import Link from "next/link";
 
+// This makes the page dynamic instead of static
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const posts = await fetchPages();
-
   return (
     <div>
       <About />

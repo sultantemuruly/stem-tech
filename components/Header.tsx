@@ -11,9 +11,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ChatModal } from "./ChatModal";
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -24,6 +26,7 @@ const Header = () => {
           </Link>
         </div>
 
+        {/* Desktop navigation */}
         <div className="hidden md:flex md:items-center md:space-x-4">
           <Link
             href="https://github.com/sultantemuruly"
@@ -34,10 +37,17 @@ const Header = () => {
           >
             <Github className="h-5 w-5" />
           </Link>
-          <Button>Ask about me</Button>
+
+          {/* Chat Dialog for desktop */}
+          <ChatModal
+            isOpen={isChatOpen}
+            onOpenChange={setIsChatOpen}
+            trigger={<Button>Ask about me</Button>}
+          />
         </div>
 
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        {/* Mobile menu */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild className="md:hidden">
             <Button variant="ghost" size="icon" aria-label="Menu">
               <Menu className="h-5 w-5" />
@@ -53,17 +63,25 @@ const Header = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 rounded-md p-2 hover:bg-accent"
-                onClick={() => setIsOpen(false)}
+                onClick={() => setIsSheetOpen(false)}
               >
                 <Github className="h-5 w-5" />
                 <span>GitHub</span>
               </Link>
-              <Button
-                onClick={() => setIsOpen(false)}
-                className="w-full justify-center"
-              >
-                Ask about me
-              </Button>
+
+              {/* Chat Dialog trigger for mobile */}
+              <ChatModal
+                isOpen={isChatOpen}
+                onOpenChange={(open) => {
+                  setIsChatOpen(open);
+                  if (open) setIsSheetOpen(false); // Close sheet when dialog opens
+                }}
+                trigger={
+                  <Button className="w-full justify-center">
+                    Ask about me
+                  </Button>
+                }
+              />
             </div>
           </SheetContent>
         </Sheet>

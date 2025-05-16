@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,6 @@ interface ChatModalProps {
   onOpenChange: (open: boolean) => void;
   trigger?: React.ReactNode;
   initialMessages?: Message[];
-  onSendMessage?: (message: string) => void;
 }
 
 export function ChatModal({
@@ -33,7 +32,6 @@ export function ChatModal({
   onOpenChange,
   trigger,
   initialMessages = [],
-  onSendMessage,
 }: ChatModalProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>(
@@ -50,7 +48,13 @@ export function ChatModal({
         ]
   );
 
-  const handleSendMessage = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -61,22 +65,54 @@ export function ChatModal({
     };
 
     setMessages((prev) => [...prev, userMessage]);
-
-    if (onSendMessage) {
-      onSendMessage(input);
-    }
-
     setInput("");
 
-    setTimeout(() => {
-      const assistantMessage: Message = {
+    try {
+      const response = await fetch(
+        `/api/ai?query=${encodeURIComponent(input)}`
+      );
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `Thanks for asking about Sultan. That's a great question about "${input}". Sultan is a developer with expertise in web development and AI.`,
+        content: "",
         role: "assistant",
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 1000);
+
+      let fullContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n").filter(Boolean);
+
+        for (const line of lines) {
+          const parsed = JSON.parse(line);
+          fullContent += parsed.message;
+
+          assistantMessage = {
+            ...assistantMessage,
+            content: fullContent,
+          };
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id ? assistantMessage : msg
+            )
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Streaming error:", error);
+    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -93,7 +129,6 @@ export function ChatModal({
         onOpenChange(open);
       }}
     >
-      {/* Use trigger if provided, otherwise fallback to default */}
       <DialogTrigger asChild>
         {trigger ? (
           trigger
@@ -101,6 +136,7 @@ export function ChatModal({
           <Button className="w-full justify-center">Ask about me</Button>
         )}
       </DialogTrigger>
+
       <DialogContent
         className="sm:max-w-[425px] h-[600px] max-h-[80vh] flex flex-col fixed inset-0 z-[1000] w-full md:w-[425px] md:h-[600px] md:max-h-[80vh] md:rounded-lg [&>button]:hidden"
         style={{
@@ -127,7 +163,7 @@ export function ChatModal({
           </Button>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 p-4 overflow-y-auto">
           <div className="flex flex-col space-y-4">
             {messages.map((message) => (
               <div
@@ -147,6 +183,7 @@ export function ChatModal({
                 </div>
               </div>
             ))}
+            <div ref={scrollRef} />
           </div>
         </ScrollArea>
 

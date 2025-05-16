@@ -16,6 +16,7 @@ import { ChatModal } from "./ChatModal";
 const Header = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const isChatAvailable = false;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,11 +40,13 @@ const Header = () => {
           </Link>
 
           {/* Chat Dialog for desktop */}
-          <ChatModal
-            isOpen={isChatOpen}
-            onOpenChange={setIsChatOpen}
-            trigger={<Button>Ask about me</Button>}
-          />
+          {isChatAvailable ? (
+            <ChatModal
+              isOpen={isChatOpen}
+              onOpenChange={setIsChatOpen}
+              trigger={<Button>Ask about me</Button>}
+            />
+          ) : null}
         </div>
 
         {/* Mobile menu */}
@@ -70,18 +73,20 @@ const Header = () => {
               </Link>
 
               {/* Chat Dialog trigger for mobile */}
-              <ChatModal
-                isOpen={isChatOpen}
-                onOpenChange={(open) => {
-                  setIsChatOpen(open);
-                  if (open) setIsSheetOpen(false); // Close sheet when dialog opens
-                }}
-                trigger={
-                  <Button className="w-full justify-center">
-                    Ask about me
-                  </Button>
-                }
-              />
+              {isChatAvailable ? (
+                <ChatModal
+                  isOpen={isChatOpen}
+                  onOpenChange={(open) => {
+                    setIsChatOpen(open);
+                    if (open) setIsSheetOpen(false); // Close sheet when dialog opens
+                  }}
+                  trigger={
+                    <Button className="w-full justify-center">
+                      Ask about me
+                    </Button>
+                  }
+                />
+              ) : null}
             </div>
           </SheetContent>
         </Sheet>
